@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miranda House CUET 2026 — Strategy Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#D4537E;--pink-light:#FBEAF0;--pink-mid:#F4C0D1;--pink-dark:#4B1528;
+  --rose:#E24B4A;--rose-light:#FCEBEB;
+  --amber:#EF9F27;--amber-light:#FAEEDA;
+  --green:#639922;--green-light:#EAF3DE;
+  --blue:#185FA5;--blue-light:#E6F1FB;
+  --text:#1a1a1a;--text2:#6b6b6b;
+  --bg:#ffffff;--bg2:#f7f6f3;
+  --border:rgba(0,0,0,0.1);
+  --r:8px;--rl:12px
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --text:#e8e6e0;--text2:#9e9b94;
+    --bg:#1c1c1a;--bg2:#252523;
+    --border:rgba(255,255,255,0.1)
+  }
+  .hero{background:linear-gradient(135deg,#3a1a28 0%,#4a2535 40%,#3d2a10 100%) !important;border-color:#5a2a3a !important}
+  .hero-stat{background:rgba(0,0,0,0.3) !important}
+  .hero-title{color:#F4C0D1 !important}
+  .hero-sub{color:#FAC775 !important}
+  .hero-stat .v{color:#F4C0D1 !important}
+  .hero-stat .l{color:#FAC775 !important}
+  .alert-box{background:#2a1010;color:#F09595}
+  .alert-box strong{color:#F7C1C1}
+  .progress-bar-wrap{background:#5a2a3a !important}
+  .xp-track{background:#5a2a3a !important}
+  .score-input-row input{background:#252523;color:#e8e6e0;border-color:rgba(255,255,255,0.15)}
+}
+body{font-family:'DM Sans',sans-serif;background:#f5f4f0;color:var(--text);min-height:100vh;padding:2rem 1rem}
+@media(prefers-color-scheme:dark){body{background:#141412}}
+.container{max-width:760px;margin:0 auto}
+.hero{background:linear-gradient(135deg,#FBEAF0 0%,#F4C0D1 40%,#FAC775 100%);border-radius:16px;padding:1.75rem 2rem;margin-bottom:1.5rem;border:0.5px solid #F4C0D1;position:relative;overflow:hidden}
+.hero::before{content:'✦';font-size:100px;position:absolute;right:-15px;top:-25px;opacity:0.1;color:#D4537E;pointer-events:none}
+.hero::after{content:'◇';font-size:70px;position:absolute;right:70px;bottom:-20px;opacity:0.08;color:#854F0B;pointer-events:none}
+.hero-title{font-family:'DM Serif Display',serif;font-size:26px;color:#4B1528;margin-bottom:4px}
+.hero-sub{font-size:13px;color:#854F0B}
+.hero-row{display:flex;gap:10px;margin-top:1.25rem;flex-wrap:wrap}
+.hero-stat{background:rgba(255,255,255,0.6);border-radius:10px;padding:0.65rem 1rem;text-align:center;min-width:80px;border:0.5px solid rgba(212,83,126,0.25)}
+.hero-stat .v{font-size:20px;font-weight:600;color:#4B1528;font-family:'DM Serif Display',serif;display:block}
+.hero-stat .l{font-size:10px;color:#854F0B;margin-top:1px;display:block}
+.alert-box{background:#FCEBEB;border-left:3px solid #E24B4A;border-radius:0 var(--r) var(--r) 0;padding:0.75rem 1rem;font-size:13px;color:#501313;margin-bottom:1.5rem;line-height:1.6}
+.alert-box strong{color:#791F1F}
+.sec-label{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.75rem;padding-bottom:0.4rem;border-bottom:0.5px solid var(--border)}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1.5rem}
+.subj-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.stab{font-size:12px;padding:5px 16px;border-radius:20px;border:0.5px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.stab:hover{border-color:var(--pink);color:var(--pink)}
+.stab.active{background:var(--pink);color:#fff;border-color:var(--pink)}
+.panel{display:none}.panel.active{display:block}
+.chapter-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text2);transition:background 0.1s}
+.chapter-row:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.d-red{background:#E24B4A}.d-amber{background:#EF9F27}.d-green{background:#639922}
+.chapter-row label{flex:1;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text)}
+.chapter-row input[type=checkbox]{accent-color:var(--pink);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.chapter-row.done label{text-decoration:line-through;opacity:0.45}
+.progress-bar-wrap{background:#F4C0D1;border-radius:20px;height:8px;overflow:hidden;margin:0.4rem 0}
+.progress-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#D4537E,#EF9F27);transition:width 0.4s ease}
+.prog-label{font-size:12px;color:var(--text2);display:flex;justify-content:space-between;margin-bottom:4px;margin-top:1rem}
+.prog-label:first-child{margin-top:0}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+@media(max-width:520px){.charts-grid{grid-template-columns:1fr}.score-grid{grid-template-columns:1fr !important}.week-grid{grid-template-columns:1fr !important}.hero-row{gap:8px}}
+.chart-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem}
+.chart-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:0.75rem}
+.chart-canvas-wrap{position:relative;width:100%;height:200px}
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+.score-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem}
+.score-card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:0.75rem}
+.score-log{list-style:none;max-height:140px;overflow-y:auto}
+.score-log li{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--text2)}
+.score-log li:last-child{border-bottom:none}
+.score-log .sc{font-weight:600;font-size:13px}
+.score-good{color:#3B6D11}.score-mid{color:#854F0B}.score-bad{color:#A32D2D}
+.score-input-row{display:flex;gap:6px;margin-top:0.75rem}
+.score-input-row input{flex:1;font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);outline:none}
+.score-input-row input:focus{border-color:var(--pink)}
+.score-input-row button{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:var(--r);border:0.5px solid var(--pink);background:#FBEAF0;color:var(--pink);cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.score-input-row button:hover{background:var(--pink);color:#fff}
+.avg-display{font-size:11px;color:var(--text2);margin-top:6px}
+.avg-display span{font-weight:500;color:var(--text)}
+.week-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
+.week-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem}
+.week-title{font-size:13px;font-weight:500;margin-bottom:0.85rem}
+.day-row{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:12.5px}
+.day-row:last-child{border-bottom:none}
+.day-lbl{color:var(--text2);min-width:56px;flex-shrink:0;font-size:11px;font-weight:500;padding-top:2px}
+.day-task{color:var(--text);line-height:1.55}
+.day-row input[type=checkbox]{accent-color:var(--pink);width:14px;height:14px;flex-shrink:0;margin-top:2px;cursor:pointer}
+.day-row.done .day-task{text-decoration:line-through;opacity:0.45}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:1.5rem}
+.tip-card{background:var(--bg2);border-radius:var(--r);padding:0.85rem 1rem;font-size:12.5px;color:var(--text2);border-left:3px solid;line-height:1.55}
+.tip-card.blue{border-color:#185FA5}.tip-card.amber{border-color:#EF9F27}.tip-card.green{border-color:#639922}.tip-card.coral{border-color:#D85A30}
+.tip-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:5px}
+.xp-wrap{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1.5rem}
+.xp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem}
+.xp-level{font-family:'DM Serif Display',serif;font-size:17px;color:var(--pink)}
+.xp-num{font-size:12px;color:var(--text2)}
+.xp-track{background:#F4C0D1;border-radius:20px;height:10px;overflow:hidden;margin-bottom:6px}
+.xp-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#D4537E,#FAC775);transition:width 0.5s ease}
+.xp-note{font-size:11px;color:var(--text2);line-height:1.5}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:0.85rem}
+.badge-pill{font-size:10px;font-weight:500;padding:4px 11px;border-radius:20px;border:0.5px solid;transition:all 0.3s}
+.bp-pink{background:#FBEAF0;color:#993556;border-color:#F4C0D1}
+.bp-amber{background:#FAEEDA;color:#854F0B;border-color:#FAC775}
+.bp-green{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}
+.bp-gray{background:var(--bg2);color:var(--text2);border-color:var(--border);opacity:0.45}
+.priority-key{display:flex;gap:14px;margin-bottom:0.85rem;font-size:12px;color:var(--text2);align-items:center;flex-wrap:wrap}
+.priority-item{display:flex;align-items:center;gap:5px}
+.info-note{font-size:12px;color:var(--blue);margin-bottom:0.85rem;background:var(--blue-light);padding:0.5rem 0.75rem;border-radius:var(--r);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <div class="hero-title">Miranda House CUET 2026</div>
+  <div class="hero-sub">BA (Hons) Political Science &nbsp;·&nbsp; General Category &nbsp;·&nbsp; Target: 925+</div>
+  <div class="hero-row">
+    <div class="hero-stat"><span class="v">925+</span><span class="l">Target score</span></div>
+    <div class="hero-stat"><span class="v">+5/−1</span><span class="l">Marking</span></div>
+    <div class="hero-stat"><span class="v">40/50</span><span class="l">Attempts target</span></div>
+    <div class="hero-stat"><span class="v">14</span><span class="l">Days to prepare</span></div>
+    <div class="hero-stat"><span class="v">May 11–31</span><span class="l">Exam window</span></div>
+  </div>
+</div>
+
+<div class="alert-box"><strong>Key fact:</strong> Miranda House 2025 Round 1 cutoff was 925.98 for General — DU's highest. You need 40+ correct per subject with minimal wrong answers. Every single mark counts.</div>
+
+<!-- XP Level -->
+<div class="sec-label">Your study level</div>
+<div class="xp-wrap">
+  <div class="xp-top">
+    <div class="xp-level" id="xp-level-label">Level 1 · Rookie Reviser</div>
+    <div class="xp-num" id="xp-count">0 XP</div>
+  </div>
+  <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+  <div class="xp-note">Each chapter ticked = +1 XP &nbsp;·&nbsp; Each day plan completed = +2 XP &nbsp;·&nbsp; Each score logged = +1 XP</div>
+  <div class="badge-row">
+    <span class="badge-pill bp-gray" id="badge-first">☆ First Tick</span>
+    <span class="badge-pill bp-gray" id="badge-halfway">☆ Halfway Hero</span>
+    <span class="badge-pill bp-gray" id="badge-polsc">☆ Pol Sc Scholar</span>
+    <span class="badge-pill bp-gray" id="badge-hist">☆ Historian</span>
+    <span class="badge-pill bp-gray" id="badge-geo">☆ Geographer</span>
+    <span class="badge-pill bp-gray" id="badge-eng">☆ Wordsmith</span>
+    <span class="badge-pill bp-gray" id="badge-allday">☆ Week Warrior</span>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="sec-label">Progress overview</div>
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="chart-title">Chapter completion</div>
+    <div class="chart-canvas-wrap"><canvas id="pieChart" role="img" aria-label="Donut chart showing chapters completed vs remaining">Tracks chapters ticked vs remaining.</canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Practice scores by subject (avg/50)</div>
+    <div class="chart-canvas-wrap"><canvas id="barChart" role="img" aria-label="Bar chart of average practice scores for each subject">Average mock scores per subject out of 50.</canvas></div>
+  </div>
+</div>
+
+<!-- Checklists -->
+<div class="sec-label">Subject syllabus checklists</div>
+<div class="card" style="margin-bottom:1.5rem">
+  <div class="priority-key">
+    <strong style="font-size:12px;color:var(--text)">Priority:</strong>
+    <span class="priority-item"><span class="dot d-red"></span> High (do first)</span>
+    <span class="priority-item"><span class="dot d-amber"></span> Medium</span>
+    <span class="priority-item"><span class="dot d-green"></span> Cover last</span>
+  </div>
+  <div class="subj-tabs">
+    <button class="stab active" onclick="switchTab('polsc',this)">Political Science</button>
+    <button class="stab" onclick="switchTab('history',this)">History</button>
+    <button class="stab" onclick="switchTab('geo',this)">Geography</button>
+    <button class="stab" onclick="switchTab('eng',this)">English</button>
+  </div>
+
+  <div id="polsc" class="panel active">
+    <div class="prog-label" style="margin-top:0"><span>Book 1: Contemporary World Politics</span><span id="polsc1-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="polsc1-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 1: Cold War Era (US-USSR rivalry, blocs)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 2: End of Bipolarity (USSR collapse, new states)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 3: US Hegemony in World Politics</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 4: Alternative Centres of Power (EU, ASEAN, China)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 5: Contemporary South Asia (SAARC, conflicts)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 6: International Organisations (UN, reforms)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 7: Security in Contemporary World</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 8: Environment and Natural Resources</label></div>
+    <div class="chapter-row"><span class="dot d-green"></span><label><input type="checkbox" data-grp="polsc1" onchange="tick(this)"> Ch 9: Globalisation</label></div>
+
+    <div class="prog-label"><span>Book 2: Politics in India Since Independence</span><span id="polsc2-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="polsc2-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 1: Challenges of Nation Building (partition, integration)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 2: Era of One Party Dominance (Congress system)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 3: Politics of Planned Development</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 4: India's External Relations (Non-alignment, wars)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 5: Challenges to Congress Dominance</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 6: Crisis of Democratic Order (Emergency 1975)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 7: Rise of Popular Movements</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 8: Regional Aspirations</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="polsc2" onchange="tick(this)"> Ch 9: Recent Developments in Indian Politics (1990s+)</label></div>
+  </div>
+
+  <div id="history" class="panel">
+    <div class="info-note">12 themes from NCERT "Themes in Indian History" (Parts I–III). CUET tests source-based MCQs — practice identifying which theme a passage belongs to.</div>
+    <div class="prog-label" style="margin-top:0"><span>Part I & II (Themes 1–8)</span><span id="hist1-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="hist1-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 1: Harappan Archaeology (cities, trade)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 2: Political & Economic History (Ashoka, inscriptions)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 3: Social Histories (Mahabharata, Varna)</label></div>
+    <div class="chapter-row"><span class="dot d-green"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 4: History of Buddhism (Sanchi)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 5: Agrarian Relations (Ain-i-Akbari, Mughal)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 6: Religious Histories (Bhakti-Sufi)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 7: Architecture & Empire (Vijayanagar)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="hist1" onchange="tick(this)"> Theme 8: Peasants, Zamindars, State (Mughal)</label></div>
+
+    <div class="prog-label"><span>Part III (Themes 9–15)</span><span id="hist2-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="hist2-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 9: Colonialism & Rural Society (Deccan riots)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 10: Representations of 1857</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 11: Mahatma Gandhi & Nationalist Movement</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 12: Colonial Cities (Bombay, Madras, Calcutta)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 13: Partition (stories, violence, memory)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 14: Framing the Constitution</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="hist2" onchange="tick(this)"> Theme 15: Source extracts (read all from textbook)</label></div>
+  </div>
+
+  <div id="geo" class="panel">
+    <div class="info-note">Two NCERT books: Fundamentals of Human Geography + India — People and Economy. Map-based MCQs are frequent.</div>
+    <div class="prog-label" style="margin-top:0"><span>Book 1: Human Geography</span><span id="geo1-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="geo1-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 1: Nature & Scope of Human Geography</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 2: People — population density, distribution, growth</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 3: Human Development (HDI, indicators)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 4: Primary Activities (agriculture types)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 5: Secondary Activities (industries)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 6: Tertiary & Quaternary Activities</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 7: Transport, Communication, Trade</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 8: International Trade</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo1" onchange="tick(this)"> Ch 9: Human Settlements (rural/urban)</label></div>
+
+    <div class="prog-label"><span>Book 2: India — People & Economy</span><span id="geo2-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="geo2-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 1: Population (census data, distribution)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 2: Migration (types, impact)</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 3: Human Development (state-level)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 4: Human Settlements</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 5: Land Resources & Agriculture</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 6: Water Resources</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 7: Mineral & Energy Resources</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 8: Manufacturing Industries</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 9: Planning & Sustainable Development</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 10: Transport & Communication</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 11: International Trade</label></div>
+    <div class="chapter-row"><span class="dot d-green"></span><label><input type="checkbox" data-grp="geo2" onchange="tick(this)"> Ch 12: Geographical Perspective on Issues</label></div>
+  </div>
+
+  <div id="eng" class="panel">
+    <div class="info-note">English is a Language paper (Section IA) — NOT domain-based. Tests Reading Comprehension only: Factual, Literary, and Narrative passages + vocabulary & literary aptitude.</div>
+    <div class="prog-label" style="margin-top:0"><span>Reading Comprehension</span><span id="eng1-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="eng1-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="eng1" onchange="tick(this)"> Factual passages — find specific info, data, facts</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="eng1" onchange="tick(this)"> Literary passages — tone, theme, author intent</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="eng1" onchange="tick(this)"> Narrative passages — character, sequence, inference</label></div>
+    <div class="chapter-row"><span class="dot d-red"></span><label><input type="checkbox" data-grp="eng1" onchange="tick(this)"> Vocabulary in context (synonyms/antonyms from passage)</label></div>
+
+    <div class="prog-label"><span>Literary Aptitude & Vocabulary</span><span id="eng2-pct">0%</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="eng2-bar" style="width:0%"></div></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="eng2" onchange="tick(this)"> Literary devices (metaphor, simile, irony, alliteration)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="eng2" onchange="tick(this)"> Identifying genres (prose, poetry, drama)</label></div>
+    <div class="chapter-row"><span class="dot d-amber"></span><label><input type="checkbox" data-grp="eng2" onchange="tick(this)"> Word meanings, one-word substitutions</label></div>
+    <div class="chapter-row"><span class="dot d-green"></span><label><input type="checkbox" data-grp="eng2" onchange="tick(this)"> Grammar: tenses, sentence correction</label></div>
+    <div class="chapter-row"><span class="dot d-green"></span><label><input type="checkbox" data-grp="eng2" onchange="tick(this)"> Idioms and phrases</label></div>
+  </div>
+</div>
+
+<!-- Practice Score Logs -->
+<div class="sec-label">Practice score log (out of 50)</div>
+<div class="score-grid">
+  <div class="score-card">
+    <div class="score-card-title">Political Science</div>
+    <ul class="score-log" id="log-polsc"></ul>
+    <div class="score-input-row">
+      <input type="number" id="inp-polsc" min="0" max="50" placeholder="Score/50">
+      <input type="text" id="note-polsc" placeholder="Note" style="flex:2">
+      <button onclick="addScore('polsc')">+ Log</button>
+    </div>
+    <div class="avg-display">Avg: <span id="avg-polsc">—</span> &nbsp;·&nbsp; Best: <span id="best-polsc">—</span></div>
+  </div>
+  <div class="score-card">
+    <div class="score-card-title">History</div>
+    <ul class="score-log" id="log-hist"></ul>
+    <div class="score-input-row">
+      <input type="number" id="inp-hist" min="0" max="50" placeholder="Score/50">
+      <input type="text" id="note-hist" placeholder="Note" style="flex:2">
+      <button onclick="addScore('hist')">+ Log</button>
+    </div>
+    <div class="avg-display">Avg: <span id="avg-hist">—</span> &nbsp;·&nbsp; Best: <span id="best-hist">—</span></div>
+  </div>
+  <div class="score-card">
+    <div class="score-card-title">Geography</div>
+    <ul class="score-log" id="log-geo"></ul>
+    <div class="score-input-row">
+      <input type="number" id="inp-geo" min="0" max="50" placeholder="Score/50">
+      <input type="text" id="note-geo" placeholder="Note" style="flex:2">
+      <button onclick="addScore('geo')">+ Log</button>
+    </div>
+    <div class="avg-display">Avg: <span id="avg-geo">—</span> &nbsp;·&nbsp; Best: <span id="best-geo">—</span></div>
+  </div>
+  <div class="score-card">
+    <div class="score-card-title">English</div>
+    <ul class="score-log" id="log-eng"></ul>
+    <div class="score-input-row">
+      <input type="number" id="inp-eng" min="0" max="50" placeholder="Score/50">
+      <input type="text" id="note-eng" placeholder="Note" style="flex:2">
+      <button onclick="addScore('eng')">+ Log</button>
+    </div>
+    <div class="avg-display">Avg: <span id="avg-eng">—</span> &nbsp;·&nbsp; Best: <span id="best-eng">—</span></div>
+  </div>
+</div>
+
+<!-- 14-day Battle Plan -->
+<div class="sec-label">14-day battle plan</div>
+<div class="week-grid">
+  <div class="week-card">
+    <div class="week-title" style="color:#185FA5">Week 1 — Content blitz (Days 1–7)</div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 1–2</span><span class="day-task">Pol Sc Book 2: Chs 1, 2, 5, 6, 9 — Emergency, Congress dominance, recent politics</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 3</span><span class="day-task">Pol Sc Book 1: Cold War, bipolarity, hegemony, UN (Chs 1–3, 6)</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 4</span><span class="day-task">History: Themes 11–14 (Gandhi, 1857, partition, Constitution) — highest CUET frequency</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 5</span><span class="day-task">History: Themes 1, 5, 7, 9, 10 (Harappa, Mughal, Vijayanagar, colonial)</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 6</span><span class="day-task">Geography: Human Geo Chs 2, 3, 6, 7 (population, HD, tertiary, transport)</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 7</span><span class="day-task">Geography: India Chs 1, 5, 8, 9, 10 + English RC practice ×3 passages</span></div>
+  </div>
+  <div class="week-card">
+    <div class="week-title" style="color:#3B6D11">Week 2 — MCQ drill & mocks (Days 8–14)</div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 8</span><span class="day-task">Pol Sc remaining (Chs 4, 7, 8 both books) + 50 MCQs from PYQs</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 9</span><span class="day-task">History remaining themes (2–4, 6, 8) + source-based MCQ practice</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 10</span><span class="day-task">Geography remaining + map-based MCQs + English ×5 RC passages</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 11</span><span class="day-task">Full mock: Pol Sc 50 Qs timed 60 min → analyse errors → revise weak areas</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 12</span><span class="day-task">Full mock: History + Geography (timed) → analyse → revise</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 13</span><span class="day-task">English mock + rapid revision of all high-priority chapters with short notes</span></div>
+    <div class="day-row"><input type="checkbox" data-grp="dayplan" onchange="dayTick(this)"><span class="day-lbl">Day 14</span><span class="day-task">Light revision only — no new content. Re-read key dates, terms. Sleep well. ✦</span></div>
+  </div>
+</div>
+
+<!-- Tips -->
+<div class="sec-label">Score maximisation tips</div>
+<div class="tips-grid">
+  <div class="tip-card blue"><div class="tip-title">NCERT verbatim reading</div>CUET questions are lifted almost word-for-word from NCERT. Read the text — don't just read coaching notes.</div>
+  <div class="tip-card amber"><div class="tip-title">Negative marking strategy</div>With −1 per wrong, skip questions you're less than 60% sure about. Target 40–42 accurate attempts over 50 rushed ones.</div>
+  <div class="tip-card green"><div class="tip-title">History: source extracts</div>Practice identifying which theme a passage belongs to. CUET regularly gives source quotes to match to context.</div>
+  <div class="tip-card coral"><div class="tip-title">Geography: maps matter</div>Mark major industrial regions, population clusters, and transport routes on a blank India map. Easy guaranteed marks.</div>
+  <div class="tip-card blue"><div class="tip-title">English: speed reading</div>Practice skimming passages in 90 seconds. You have ~72 seconds per question — RC passages eat time.</div>
+  <div class="tip-card amber"><div class="tip-title">PYQ papers are gold</div>Solve CUET 2022, 2023, 2024 papers per subject. Same themes, data points, extracts repeat across years.</div>
+</div>
+
+<!-- Resources -->
+<div class="sec-label">Free resources</div>
+<div class="tips-grid" style="margin-bottom:2rem">
+  <div class="tip-card green"><div class="tip-title">Official NCERT PDFs</div>ncert.nic.in — download all four books free.</div>
+  <div class="tip-card blue"><div class="tip-title">CUET PYQs</div>cuet.nta.nic.in official sample papers + 2022–2025 papers. Most important practice material.</div>
+  <div class="tip-card amber"><div class="tip-title">YouTube channels</div>Unacademy CUET, PW CUET, Magnet Brains — free chapter-wise videos for Pol Sc & History.</div>
+  <div class="tip-card coral"><div class="tip-title">Book recommendation</div>Arihant CUET Humanities 2026 — 2000+ MCQs mapped to NCERT chapters.</div>
+</div>
+
+</div><!-- /container -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var scores={polsc:[],hist:[],geo:[],eng:[]};
+var grpCounts={polsc1:9,polsc2:9,hist1:8,hist2:7,geo1:9,geo2:12,eng1:4,eng2:5};
+var grpChecked={polsc1:0,polsc2:0,hist1:0,hist2:0,geo1:0,geo2:0,eng1:0,eng2:0};
+var dayCount=0,totalDays=13;
+var pieChart,barChart;
+var totalChapters=Object.values(grpCounts).reduce(function(a,b){return a+b;},0);
+
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.stab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function tick(cb){
+  var grp=cb.dataset.grp;
+  var row=cb.closest('.chapter-row');
+  if(cb.checked){grpChecked[grp]++;row.classList.add('done');}
+  else{grpChecked[grp]--;row.classList.remove('done');}
+  updateGroupBar(grp);
+  updateXP();
+  updatePieChart();
+  checkBadges(grp);
+}
+
+function updateGroupBar(grp){
+  var pct=Math.round(grpChecked[grp]/grpCounts[grp]*100);
+  var bar=document.getElementById(grp+'-bar');
+  var lbl=document.getElementById(grp+'-pct');
+  if(bar)bar.style.width=pct+'%';
+  if(lbl)lbl.textContent=pct+'%';
+}
+
+function getTotalChecked(){
+  return Object.values(grpChecked).reduce(function(a,b){return a+b;},0);
+}
+
+function dayTick(cb){
+  if(cb.checked)dayCount++;else dayCount--;
+  updateXP();
+  checkBadges('day');
+}
+
+function getScoreXP(){
+  return scores.polsc.length+scores.hist.length+scores.geo.length+scores.eng.length;
+}
+
+function updateXP(){
+  var chapterXP=getTotalChecked();
+  var dayXP=dayCount*2;
+  var scoreXP=getScoreXP();
+  var total=chapterXP+dayXP+scoreXP;
+  var maxXP=totalChapters+totalDays*2+20;
+  var pct=Math.min(100,Math.round(total/maxXP*100));
+  document.getElementById('xp-fill').style.width=pct+'%';
+  document.getElementById('xp-count').textContent=total+' / '+maxXP+' XP';
+  var level='Level 1 · Rookie Reviser';
+  if(total>=10)level='Level 2 · Diligent Scholar';
+  if(total>=25)level='Level 3 · CUET Crusader';
+  if(total>=45)level='Level 4 · Miranda Aspirant';
+  if(total>=65)level='Level 5 · Distinction Seeker';
+  if(total>=85)level='Level 6 · Elite Contender';
+  if(pct>=90)level='Level 7 · Miranda House Bound ✦';
+  document.getElementById('xp-level-label').textContent=level;
+}
+
+function checkBadges(grp){
+  var total=getTotalChecked();
+  if(total>=1)unlock('badge-first','bp-pink','★ First Tick');
+  if(total>=Math.floor(totalChapters/2))unlock('badge-halfway','bp-amber','★ Halfway Hero');
+  if(grpChecked.polsc1+grpChecked.polsc2>=grpCounts.polsc1+grpCounts.polsc2)unlock('badge-polsc','bp-pink','★ Pol Sc Scholar');
+  if(grpChecked.hist1+grpChecked.hist2>=grpCounts.hist1+grpCounts.hist2)unlock('badge-hist','bp-amber','★ Historian');
+  if(grpChecked.geo1+grpChecked.geo2>=grpCounts.geo1+grpCounts.geo2)unlock('badge-geo','bp-green','★ Geographer');
+  if(grpChecked.eng1+grpChecked.eng2>=grpCounts.eng1+grpCounts.eng2)unlock('badge-eng','bp-pink','★ Wordsmith');
+  if(dayCount>=totalDays)unlock('badge-allday','bp-green','★ Week Warrior');
+}
+
+function unlock(id,cls,label){
+  var el=document.getElementById(id);
+  if(!el)return;
+  el.className='badge-pill '+cls;
+  el.style.opacity='1';
+  el.textContent=label;
+}
+
+function addScore(subj){
+  var inp=document.getElementById('inp-'+subj);
+  var note=document.getElementById('note-'+subj);
+  var v=parseInt(inp.value);
+  if(isNaN(v)||v<0||v>50)return;
+  scores[subj].push({v:v,note:note.value});
+  inp.value='';note.value='';
+  renderLog(subj);
+  updateXP();
+  updateBarChart();
+}
+
+function renderLog(subj){
+  var ul=document.getElementById('log-'+subj);
+  ul.innerHTML='';
+  var arr=scores[subj];
+  for(var i=arr.length-1;i>=0;i--){
+    var s=arr[i];
+    var cls=s.v>=40?'score-good':s.v>=30?'score-mid':'score-bad';
+    var li=document.createElement('li');
+    li.innerHTML='<span style="color:var(--text2);font-size:11px">Mock '+(i+1)+(s.note?' · '+s.note:'')+'</span><span class="sc '+cls+'">'+s.v+'/50</span>';
+    ul.appendChild(li);
+  }
+  var vals=arr.map(function(x){return x.v;});
+  var avg=vals.length?(Math.round(vals.reduce(function(a,b){return a+b;},0)/vals.length*10)/10):null;
+  var best=vals.length?Math.max.apply(null,vals):null;
+  document.getElementById('avg-'+subj).textContent=avg!==null?avg:'—';
+  document.getElementById('best-'+subj).textContent=best!==null?best+'/50':'—';
+}
+
+function getAvg(subj){
+  var arr=scores[subj];
+  if(!arr.length)return 0;
+  return Math.round(arr.reduce(function(a,b){return a+b.v;},0)/arr.length);
+}
+
+function updatePieChart(){
+  var done=getTotalChecked();
+  var rem=totalChapters-done;
+  if(pieChart){pieChart.data.datasets[0].data=[done,rem];pieChart.update();}
+}
+
+function updateBarChart(){
+  if(barChart){
+    barChart.data.datasets[0].data=[getAvg('polsc'),getAvg('hist'),getAvg('geo'),getAvg('eng')];
+    barChart.update();
+  }
+}
+
+window.addEventListener('load',function(){
+  pieChart=new Chart(document.getElementById('pieChart'),{
+    type:'doughnut',
+    data:{labels:['Done','Remaining'],datasets:[{data:[0,totalChapters],backgroundColor:['#D4537E','#F4C0D1'],borderWidth:0,hoverOffset:4}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.parsed+' chapters';}}}}}
+  });
+  barChart=new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{labels:['Pol Sc','History','Geography','English'],datasets:[{label:'Avg/50',data:[0,0,0,0],backgroundColor:['#D4537E','#EF9F27','#639922','#185FA5'],borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:50,ticks:{stepSize:10},grid:{color:'rgba(128,128,128,0.1)'}},x:{grid:{display:false}}},plugins:{legend:{display:false}}}
+  });
+});
+</script>
+</body>
+</html>
